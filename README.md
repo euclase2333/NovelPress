@@ -1,4 +1,3 @@
-markdown
 # NovelPress 小说排版工具
 
 一个网页工具，帮你把写好的小说（txt 或 epub 文件）排成**可以拿去印刷的 PDF**。
