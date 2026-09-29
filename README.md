@@ -46,7 +46,7 @@
 **方式一（推荐）：用在线版**
 
 打开这个网址即可：
-https://euclase2333.github.io/novelpress/
+https://euclase2333.github.io/NovelPress/
 
 **方式二：本地运行（离线）**
 
