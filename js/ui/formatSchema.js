@@ -28,7 +28,6 @@ export const SCHEMA = [
     { key: 'showHeader', label: '显示页眉', type: 'check' },
     { key: 'showFooter', label: '显示页脚', type: 'check' },
     { key: 'headerText', label: '页眉文字（可用 {bookTitle} 代表书名）', type: 'text', placeholder: '如 {bookTitle}' },
-    { key: 'footerText', label: '页脚文字', type: 'text' },
     { key: 'showPageNumber', label: '显示页码', type: 'check' },
     { key: 'pageNumberStart', label: '页码起始（正文第一页）', type: 'number', min: -99, max: 9999, step: 1, slider: false },
     { key: 'oddEvenDifferent', label: '左右页不同（右页页眉为章节名）', type: 'check' },
