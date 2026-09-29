@@ -4,10 +4,12 @@
 // 前置页总数恒为偶数，保证正文第一页（页码 1）落在物理奇数页 = 右页。
 // 坐标单位 mm（与页面设置一致），字号单位 pt。版心 = 页边距围出的整块区域（无页眉页脚占位）。
 // 行格式同 paginator：{ text, x, y, size, h, type, family, weight, align?, ax? }
-//   align = 'right' | 'center' 时，ax 为锚点（右边缘 / 中线），预览与 PDF 按实际字宽对齐；x 为估算值，仅作兜底
 //
-// 目录页码：补零到 PAGE_NO_DIGITS 位，不加空格（目录条目里数字不与英文混排，
-// 不会触发 fontkit 的全角替换，直接半角即可）。
+// 目录条目：章节名左对齐，页码右对齐，中间留白（无点线引导符）。
+// 目录页左右对称缩进：
+//   右页（物理奇数）："目录"标题和章节名都右移 INDENT_RATIO，页码靠右不动。
+//   左页（物理偶数）："目录"标题和章节名都靠左不动，页码左移 INDENT_RATIO。
+// 目录分页：无论一页还是多页，每一页的内容都垂直居中。
 import { PT_MM, textWidth, wrapText } from './textMetrics.js';
 import { HEADING_FONT } from '../fonts.js';
 
@@ -16,7 +18,7 @@ export const TOC_HEADING_SIZE = 16;      // pt，"目录"
 export const TOC_ENTRY_SIZE = 10;        // pt，目录条目（正文字体）
 const HEADING_LH = 1.4;                  // 标题类文字的行高倍数
 const TOC_HEADING_GAP_LINES = 2;         // "目录"下方空几行（按条目行高）
-const LEADER = '…';                      // 点线引导符：CN 字体中为全角，与估算宽度（1em）一致
+const INDENT_RATIO = 0.30;               // 目录条目左右对称缩进的比例（0~1）
 
 const PAGE_NO_DIGITS = 3;                // 页码补零位数
 const fmtPageNo = (n) => String(n).padStart(PAGE_NO_DIGITS, '0');
@@ -63,92 +65,103 @@ function titlePage(page, bookTitle) {
 
 const blankPage = (note) => ({ type: 'blank', note, lines: [], body: null, chapterId: null, chapterTitle: null });
 
-/** 目录单条目预测 */
-function measureEntry(e, size, bodyW) {
+/**
+ * 目录单条目预测。
+ * rightPage = true 时，章节名会右移 INDENT_RATIO * bodyW，可用宽度相应减少。
+ */
+function measureEntry(e, size, bodyW, rightPage) {
   const num = fmtPageNo(e.pageNo);
   const numW = textWidth(num, size);
   const em = size * PT_MM;
+  const shift = bodyW * INDENT_RATIO;
+  const nameMax = Math.max(em, bodyW - numW - 2 * em - shift);
   const name = e.title || '（无标题）';
-  const nameMax = Math.max(em, bodyW - numW - 2 * em);
   const nameLines = wrapText(name, size, nameMax);
-  return { num, numW, name, nameLines, em };
+  return { num, numW, name, nameLines, em, shift };
 }
 
-/**
- * 目录页（从物理第 3 页开始）
- *   - 若所有条目能装进一页 → 唯一一页内容垂直居中
- *   - 若装不下 → 逐页顶部起排
- */
 function tocPages(page, entries, bodyFont, lineHeight) {
   const size = TOC_ENTRY_SIZE;
-  const em = size * PT_MM;
   const lh = size * lineHeight * PT_MM;
   const hSize = TOC_HEADING_SIZE;
   const hH = hSize * HEADING_LH * PT_MM;
   const headingBlock = hH + TOC_HEADING_GAP_LINES * lh;
 
-  const singlePage = (() => {
-    const b = frontBox(page, 3);
-    let y = b.y + headingBlock;
-    const bottom = b.y + b.h;
-    for (const e of entries) {
-      const { nameLines } = measureEntry(e, size, b.w);
+  // 每一页的内容在版心内垂直居中：
+  //   先按页码能装下多少条分页，算出每页的实际内容高度，再把该页内容中心对齐到版心中心。
+  // 分页预演：以"版心满高"为容量，逐条累积；超了就开新页。
+  const pageStartIndices = [0];                             // 每页起始条目下标
+  const pageContentHeights = [];                            // 每页内容高度（mm）
+
+  {
+    // 第 1 页：容量 = 版心高 - headingBlock（"目录"标题占位）
+    const b1 = frontBox(page, 3);
+    let capacity = b1.h - headingBlock;
+    let used = 0;
+    let i = 0;
+    while (i < entries.length) {
+      const rightPage = isRightPhysical(3 + pageStartIndices.length - 1);
+      const { nameLines } = measureEntry(entries[i], size, b1.w, rightPage);
       const need = nameLines.length * lh;
-      if (y + need > bottom + 1e-6 && y > b.y + 1e-6) return false;
-      y += need;
+      if (used + need > capacity + 1e-6 && used > 1e-6) {
+        // 换页
+        pageContentHeights.push(used + (pageStartIndices.length === 1 ? headingBlock : 0));
+        pageStartIndices.push(i);
+        // 新页：容量 = 版心高
+        used = 0;
+        capacity = b1.h;
+        continue;
+      }
+      used += need;
+      i++;
     }
-    return true;
-  })();
+    // 最后一页
+    pageContentHeights.push(used + (pageStartIndices.length === 1 ? headingBlock : 0));
+  }
 
   const out = [];
-  let cur = null;
-  let y = 0;
-  const newPage = () => {
-    const box = frontBox(page, 3 + out.length);
-    cur = { type: 'toc', tocIndex: out.length, lines: [], body: box, chapterId: null, chapterTitle: null };
+  for (let pi = 0; pi < pageStartIndices.length; pi++) {
+    const physical = 3 + pi;
+    const box = frontBox(page, physical);
+    const rightPage = isRightPhysical(physical);
+    const cur = { type: 'toc', tocIndex: pi, lines: [], body: box, chapterId: null, chapterTitle: null, rightPage };
     out.push(cur);
-    y = box.y;
-  };
 
-  newPage();
-  let startY = cur.body.y;
-  if (singlePage) {
-    let total = headingBlock;
-    for (const e of entries) {
-      const { nameLines } = measureEntry(e, size, cur.body.w);
-      total += nameLines.length * lh;
+    // 垂直居中：内容块中心 = 版心中心
+    const contentH = pageContentHeights[pi];
+    let y = box.y + box.h / 2 - contentH / 2;
+    if (y < box.y) y = box.y;
+
+    // "目录"标题：只在第 1 页；右页右移，左页不动
+    if (pi === 0) {
+      const headingShift = rightPage ? box.w * INDENT_RATIO : 0;
+      cur.lines.push(mkLine('目录', box.x + headingShift, y, hSize, hH, 'tocHeading', HEADING_FONT));
+      y += headingBlock;
     }
-    startY = cur.body.y + cur.body.h / 2 - total / 2;
-    if (startY < cur.body.y) startY = cur.body.y;
-  }
-  y = startY;
 
-  cur.lines.push(mkLine('目录', cur.body.x, y, hSize, hH, 'tocHeading', HEADING_FONT));
-  y += headingBlock;
+    const from = pageStartIndices[pi];
+    const to = (pi + 1 < pageStartIndices.length) ? pageStartIndices[pi + 1] : entries.length;
+    for (let i = from; i < to; i++) {
+      const e = entries[i];
+      const { num, numW, nameLines, shift } = measureEntry(e, size, box.w, rightPage);
+      const { x, w } = box;
+      const right = x + w;
 
-  for (const e of entries) {
-    const { num, numW, nameLines, em: emLocal } = measureEntry(e, size, cur.body.w);
-    const need = nameLines.length * lh;
-    const bottom = cur.body.y + cur.body.h;
-    if (y + need > bottom + 1e-6 && y > cur.body.y + 1e-6) newPage();
+      const nameX = rightPage ? x + shift : x;
+      const numAnchorX = rightPage ? right : right - shift;
+      const numX = numAnchorX - numW;
 
-    const { x, w } = cur.body;
-    const right = x + w;
-    nameLines.forEach((l, i) => {
-      cur.lines.push(mkLine(l.text, x, y, size, lh, 'toc', bodyFont));
-      if (i === nameLines.length - 1) {
-        const nameEnd = x + textWidth(l.text, size) + emLocal / 2;
-        const leaderEnd = right - numW - emLocal / 2;
-        const count = Math.floor((leaderEnd - nameEnd) / emLocal + 1e-6);
-        if (count > 0) {
-          const lt = LEADER.repeat(count);
-          cur.lines.push(mkLine(lt, leaderEnd - count * emLocal, y, size, lh, 'tocLeader', bodyFont));
+      nameLines.forEach((l, li) => {
+        cur.lines.push(mkLine(l.text, nameX, y, size, lh, 'toc', bodyFont));
+        if (li === nameLines.length - 1) {
+          cur.lines.push(mkLine(num, numX, y, size, lh, 'tocNum', bodyFont,
+            { align: 'right', ax: numAnchorX }));
         }
-        cur.lines.push(mkLine(num, right - numW, y, size, lh, 'tocNum', bodyFont, { align: 'right', ax: right }));
-      }
-      y += lh;
-    });
+        y += lh;
+      });
+    }
   }
+
   return out;
 }
 
