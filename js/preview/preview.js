@@ -25,8 +25,14 @@ const TOOLBAR = `
   <label class="tb-item"><input type="checkbox" id="tb-guides" checked> 辅助线</label>
   <label class="tb-item">缩放
     <select id="tb-zoom" class="input tb-select">
-      <option value="0.75">75%</option><option value="1" selected>100%</option>
-      <option value="1.25">125%</option><option value="1.5">150%</option>
+      <option value="0.25">25%</option>
+      <option value="0.33">33%</option>
+      <option value="0.5">50%</option>
+      <option value="0.75">75%</option>
+      <option value="1" selected>100%</option>
+      <option value="1.25">125%</option>
+      <option value="1.5">150%</option>
+      <option value="2">200%</option>
     </select>
   </label>
   <span class="tb-info" id="tb-info"></span>`;
@@ -74,7 +80,7 @@ export function mountPreview(titleEl, bodyEl) {
     if (mode === 'double') {
       const spreadPx = 2 * (dims.width + 2 * dims.bleed) * PX_PER_MM;
       const avail = bodyEl.clientWidth - DOUBLE_PAD - DOUBLE_GAP;
-      const z = Math.max(0.2, Math.min(1, avail / spreadPx));   // 自适应，不超过 100%
+      const z = Math.max(0.1, Math.min(1, avail / spreadPx));   // 自适应，不超过 100%；下限 10%
       setMm(z);
     } else {
       setMm(Number(zoomSel.value));
