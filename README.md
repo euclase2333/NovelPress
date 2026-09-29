@@ -4,6 +4,8 @@
 
 不需要安装任何软件，用浏览器打开就能用。
 
+在线地址：https://euclase2333.github.io/NovelPress/
+
 ---
 
 ## 这个工具能做什么
