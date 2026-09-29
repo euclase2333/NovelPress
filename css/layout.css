@@ -1,3 +1,4 @@
+/* file: css/layout.css */
 /* 三栏布局：左 280 / 中自适应 / 右 300 */
 .app {
   display: grid;
@@ -24,4 +25,26 @@
   flex: 1;
   overflow: auto;
   padding: 16px;
+}
+
+/* ---------- 窄屏（手机 / 平板竖屏）：改成上下三段 ---------- */
+/* 顺序：输入区 → 格式区 → 预览区（从上到下）
+   预览放最下面，方便拇指操作和查看。
+   用 grid-template-areas 明确指定排列顺序。 */
+@media (max-width: 768px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 26vh) minmax(0, 26vh) minmax(0, 48vh);
+    grid-template-areas:
+      "input"
+      "format"
+      "preview";
+    height: 100vh;
+    overflow: hidden;
+  }
+  .panel-left   { grid-area: input;   border-right: none; border-bottom: 1px solid var(--border); }
+  .panel-right  { grid-area: format;  border-left: none;  border-bottom: 1px solid var(--border); }
+  .panel-center { grid-area: preview; border-bottom: none; }
+  /* 侧栏内边距略缩，省出垂直空间 */
+  .panel-body { padding: 10px 12px; }
 }
