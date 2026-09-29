@@ -55,6 +55,8 @@ https://euclase2333.github.io/NovelPress/
 python -m http.server
 3. 浏览器访问 `http://localhost:8000`
 
+第一次加载耗时可能比较长，请耐心等待。
+
 ---
 
 ## 操作步骤
