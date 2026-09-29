@@ -1,0 +1,226 @@
+/* 组件样式（按钮/输入框/滑块/章节列表等，后续阶段补充） */
+.empty-hint { color: var(--text-muted); font-size: 13px; }
+
+/* ---- 阶段 2：输入区 ---- */
+.btn {
+  padding: 6px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { color: #fff; opacity: 0.9; }
+.btn-ghost { width: 100%; margin-top: 8px; font-size: 12px; color: var(--text-muted); }
+.btn-row { display: flex; gap: 8px; margin-top: 8px; }
+.btn-row .btn { flex: 1; }
+.input, .input-textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+}
+.input:focus, .input-textarea:focus { outline: none; border-color: var(--accent); }
+.title-input { margin-bottom: 8px; }
+.input-textarea { height: 160px; resize: vertical; line-height: 1.5; }
+.status { min-height: 18px; margin-top: 8px; font-size: 12px; color: var(--text-muted); }
+.status.error { color: #c0392b; }
+.section-title { margin: 12px 0 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+.chapter-list { list-style: none; margin: 0; padding: 0; }
+.chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  margin-bottom: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.chapter-item { cursor: pointer; }
+.chapter-item:hover { border-color: #c9c9c9; }
+.chapter-item.active { border-color: var(--accent); background: rgba(130, 100, 180, 0.08); }
+.chapter-item.active .ch-title { color: var(--accent); font-weight: 600; }
+.chapter-item.dragging { opacity: 0.4; }
+.chapter-item.drag-over { border-color: var(--accent); box-shadow: 0 -2px 0 var(--accent); }
+.drag-handle { color: var(--text-muted); cursor: grab; user-select: none; letter-spacing: -2px; }
+.ch-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-input { flex: 1; min-width: 0; padding: 2px 6px; }
+.ch-meta { flex: none; font-size: 11px; color: var(--text-muted); }
+.icon-btn {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--bg-side); color: var(--accent); }
+
+/* ---- 阶段 3：预览区（几何全部由 CSS 变量驱动，单位 mm） ---- */
+#preview-body { padding: 0; background: #ececee; position: relative; }
+.preview-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.seg-btn {
+  padding: 2px 12px;
+  background: var(--bg);
+  border: none;
+  border-right: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.seg-btn:last-child { border-right: none; }
+.seg-btn:hover { color: var(--accent); }
+.seg-btn.active { background: var(--accent); color: #fff; }
+.tb-select:disabled { opacity: 0.45; cursor: not-allowed; }
+.tb-item { display: flex; align-items: center; gap: 4px; }
+.tb-select { width: auto; padding: 2px 4px; }
+.tb-info { margin-left: auto; }
+
+.preview-canvas {
+  --mm: 3.7795px;
+  --pt: calc(var(--mm) * 0.352778);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+}
+.spread-row { display: flex; justify-content: center; align-items: flex-start; gap: 8px; }   /* gap 需与 preview.js 的 DOUBLE_GAP 一致 */
+.spread-row.is-single { gap: 0; }
+.page-wrap { flex: none; }
+.page-empty { visibility: hidden; }                 /* 双页缺页一侧：不可见，只占位 */
+.preview-canvas.mode-double { gap: 16px; }
+.page-label { margin-bottom: 6px; font-size: 12px; color: var(--text-muted); text-align: center; }
+.page-badge {
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+}
+/* 出血：半透明浅蓝填充 + 浅蓝实线外框 */
+.sheet {
+  position: relative;
+  flex: none;
+  width: calc((var(--pw) + 2 * var(--bleed)) * var(--mm));
+  height: calc((var(--ph) + 2 * var(--bleed)) * var(--mm));
+  background-color: #fff;
+  background-image: linear-gradient(rgba(100, 180, 255, 0.25), rgba(100, 180, 255, 0.25));
+  outline: 1px solid #7ab8e8;
+}
+/* 成品页：白底 + 黑色裁切线 */
+.trim {
+  position: absolute;
+  left: calc(var(--bleed) * var(--mm));
+  top: calc(var(--bleed) * var(--mm));
+  width: calc(var(--pw) * var(--mm));
+  height: calc(var(--ph) * var(--mm));
+  background: #fff;
+}
+.trim::after { content: ""; position: absolute; inset: 0; border: 1px solid #000; pointer-events: none; }
+.guide {
+  display: none;
+  position: absolute;
+  left: calc(var(--x) * var(--mm));
+  top: calc(var(--y) * var(--mm));
+  width: calc(var(--w) * var(--mm));
+  height: calc(var(--h) * var(--mm));
+  pointer-events: none;
+}
+.show-guides .guide { display: block; }
+.guide-margin { border: 1px dashed #f59e0b; }   /* 页边距 */
+.guide-body { border: 1px dashed #10b981; }     /* 正文区（已扣除页眉页脚） */
+.line {
+  position: absolute;
+  left: calc(var(--x) * var(--mm));
+  top: calc(var(--y) * var(--mm));
+  height: calc(var(--h) * var(--mm));
+  line-height: calc(var(--h) * var(--mm));
+  font-size: calc(var(--size) * var(--pt));
+  font-family: var(--book-font, "Source Han Serif"), "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+  white-space: pre;
+  letter-spacing: calc(var(--gap, 0) * var(--mm));   /* 两端对齐：--gap 为 mm 数值，无 --gap 时为 0 */
+  /* 关闭浏览器自带的排版"优化"：布局按"全角=1em"估算，浏览器不能再私自压缩标点 / 插入中西文间距 */
+  text-spacing-trim: space-all;      /* 关闭连续全角标点压缩（如 。” 中的 。被压成半角） */
+  text-autospace: no-autospace;      /* 关闭中西文自动加间距 */
+  font-feature-settings: "chws" 0, "halt" 0, "palt" 0;   /* 关闭字体自带的标点半宽/比例宽度特性 */
+  color: #111;
+}
+/* 字体族与字重来自 paginator 输出，由 pageView 写在行内样式；标题、页眉页脚同理 */
+.line-header, .line-footer { color: #111; }
+/* 章标题支持双击编辑，鼠标悬停给出提示 */
+.line-chapterTitle { cursor: text; }
+/* 双击章标题时叠加的编辑框：复用 .line 的定位变量（--x/--y/--size/--h），另加 --w 控制宽度 */
+.title-edit-input {
+  position: absolute;
+  left: calc(var(--x) * var(--mm));
+  top: calc(var(--y) * var(--mm));
+  width: calc(var(--w) * var(--mm));
+  height: calc(var(--h) * var(--mm));
+  margin: 0;
+  padding: 0 2px;
+  box-sizing: border-box;
+  border: 1px solid var(--accent);
+  outline: none;
+  background: #fff;
+  font-size: calc(var(--size) * var(--pt));
+  line-height: calc(var(--h) * var(--mm) - 2px);
+  color: #111;
+  z-index: 5;
+}
+.title-edit-input:disabled { border-color: var(--border); color: var(--text-muted); background: #f5f5f5; }
+/* 右对齐 / 居中行：--x 为锚点（右边缘 / 中线），按实际字宽回移，与 PDF 一致 */
+.line.align-right { transform: translateX(-100%); }
+.line.align-center { transform: translateX(-50%); }
+
+/* ---- 阶段 5：页面类型（书名 / 空白 / 目录 / 章首 / 补白） ---- */
+.page-badge { display: inline-block; }                /* 徽标与页签文字同行 */
+.page-badge.badge-muted { background: #9a9a9a; }
+/* 空白页：仅在显示辅助线时给出浅色提示（不进 PDF） */
+.show-guides .page-blank .trim::before,
+.show-guides .page-padBlank .trim::before {
+  content: "空白页";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(12 * var(--pt));
+  color: #cfcfcf;
+  letter-spacing: 0.3em;
+  pointer-events: none;
+}
+/* 无页码的前置页：页签颜色更浅，便于与正文页区分 */
+.page-title .page-label, .page-blank .page-label, .page-toc .page-label { opacity: 0.75; }
+
+/* ---- 阶段 4：格式面板控件 ---- */
+.fmt-section { margin-bottom: 16px; }
+.fmt-section .section-title { margin-top: 0; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+.ctl { margin-bottom: 10px; }
+.ctl-head { display: flex; align-items: center; gap: 6px; }
+.ctl-label { flex: 1; min-width: 0; margin-bottom: 4px; font-size: 12px; color: var(--text); }
+.ctl-head .ctl-label { margin-bottom: 0; }
+.ctl-num { width: 68px; padding: 3px 6px; text-align: right; }
+.ctl-unit { width: 22px; font-size: 11px; color: var(--text-muted); }
+.ctl-range { width: 100%; margin: 4px 0 0; accent-color: var(--accent); }
+.ctl-check { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; }
+.ctl-check input { accent-color: var(--accent); }
+.fmt-info { margin-top: 4px; font-size: 12px; line-height: 1.5; color: var(--text-muted); }

@@ -1,0 +1,91 @@
+/* file: css/fonts.css */
+/* 预览用字体：与 PDF 嵌入的是同一批 ttf，只引用 assets/fonts/*.ttf（不碰 _otf_backup）。
+   family 名必须与 js/fonts.js 里的 cssFamily 一致；font-weight 必须与其中的 css 数值一致。 */
+
+/* ===== 思源宋体 Source Han Serif ===== */
+@font-face {
+  font-family: "Source Han Serif";
+  font-weight: 200;
+  src: url("../assets/fonts/SourceHanSerifCN-ExtraLight.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Serif";
+  font-weight: 300;
+  src: url("../assets/fonts/SourceHanSerifCN-Light.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Serif";
+  font-weight: 400;
+  src: url("../assets/fonts/SourceHanSerifCN-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Serif";
+  font-weight: 500;
+  src: url("../assets/fonts/SourceHanSerifCN-Medium.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Serif";
+  font-weight: 600;
+  src: url("../assets/fonts/SourceHanSerifCN-SemiBold.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Serif";
+  font-weight: 700;
+  src: url("../assets/fonts/SourceHanSerifCN-Bold.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Serif";
+  font-weight: 900;
+  src: url("../assets/fonts/SourceHanSerifCN-Heavy.ttf") format("truetype");
+  font-display: swap;
+}
+
+/* ===== 思源黑体 Source Han Sans（Normal = 350） ===== */
+@font-face {
+  font-family: "Source Han Sans";
+  font-weight: 200;
+  src: url("../assets/fonts/SourceHanSansCN-ExtraLight.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Sans";
+  font-weight: 300;
+  src: url("../assets/fonts/SourceHanSansCN-Light.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Sans";
+  font-weight: 350;
+  src: url("../assets/fonts/SourceHanSansCN-Normal.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Sans";
+  font-weight: 400;
+  src: url("../assets/fonts/SourceHanSansCN-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Sans";
+  font-weight: 500;
+  src: url("../assets/fonts/SourceHanSansCN-Medium.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Sans";
+  font-weight: 700;
+  src: url("../assets/fonts/SourceHanSansCN-Bold.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Han Sans";
+  font-weight: 900;
+  src: url("../assets/fonts/SourceHanSansCN-Heavy.ttf") format("truetype");
+  font-display: swap;
+}

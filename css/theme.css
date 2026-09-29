@@ -1,0 +1,24 @@
+/* css/theme.css —— Obsidian 灰白主题变量 + 全局 reset */
+:root {
+  --bg: #ffffff;
+  --bg-side: #f7f7f7;
+  --border: #e0e0e0;
+  --text: #2e2e2e;
+  --text-muted: #888888;
+  --accent: #8264b4;
+  --radius: 6px;
+  --font-ui: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p { margin: 0; }
+button, input, textarea, select { font: inherit; color: inherit; }
+::selection { background: rgba(130, 100, 180, 0.18); }
