@@ -1,8 +1,8 @@
 // file: js/export/pdfBuilder.js
 // 用 pdf-lib 组装普通 PDF（不转曲）：每个用到的字体（族+字重）各嵌入一份，文字用 drawText 直接绘制
 // 每行文字的字体由分页结果里的 family / weight 决定，与预览一致；所有文字为纯黑
-// 页面 = (宽+2×出血) × (高+2×出血)；出血区四角绘制裁切角线；同时写入 TrimBox / BleedBox
-// 页序即分页结果的物理页序（书名页 / 空白页 / 目录 / 章间补白页都照常输出，空白页只有角线）
+// 页面 = (宽+2×出血) × (高+2×出血)；不绘制裁切角线；写入 TrimBox / BleedBox 供印刷厂裁切
+// 页序即分页结果的物理页序（书名页 / 空白页 / 目录 / 章间补白页都照常输出，空白页无角线）
 // 对齐：line.align = 'right' | 'center' 时，以 line.ax 为锚点、按字体实际字宽定位（章标题、目录页码、右页页眉页脚、书名）
 // 两端对齐：line.gap > 0 的行逐字 drawText，x 用 charWidth 估算宽度 + gap 累加（与 wrapText 一致，右端严格贴齐）
 // 子集化默认关闭：pdf-lib + fontkit 生成的子集元信息不完整，Acrobat 会报
@@ -22,19 +22,6 @@ export function usedFontKeys(pages) {
   for (const p of pages) for (const l of p.lines) set.add(lineFontKey(l));
   if (!set.size) set.add(fallbackKey(FONT_FAMILIES[0].cssFamily));
   return [...set];
-}
-
-/** 出血区四角的角线：从页面边缘画到成品角点，长度=出血宽度 */
-function drawCropMarks(pg, rgb, W, H, b, tw, th) {
-  const opt = { thickness: 0.25, color: rgb(0, 0, 0) };
-  for (const x of [b, b + tw]) {
-    pg.drawLine({ start: { x, y: 0 }, end: { x, y: b }, ...opt });
-    pg.drawLine({ start: { x, y: H }, end: { x, y: H - b }, ...opt });
-  }
-  for (const y of [b, b + th]) {
-    pg.drawLine({ start: { x: 0, y }, end: { x: b, y }, ...opt });
-    pg.drawLine({ start: { x: W, y }, end: { x: W - b, y }, ...opt });
-  }
 }
 
 /** 一行文字的 x（pt，含出血偏移）：左对齐用 l.x；右/居中对齐按实际字宽相对锚点 l.ax 回移 */
@@ -104,7 +91,7 @@ export async function buildPdf({ pages, page, fontBytes, title = 'NovelPress', o
     if (b > 0) {
       pdfPage.setBleedBox(0, 0, W, H);
       pdfPage.setTrimBox(b, b, tw, th);
-      drawCropMarks(pdfPage, rgb, W, H, b, tw, th);
+      // 不绘制裁切角线：印刷厂按 TrimBox 裁切即可，角线常被要求删掉
     }
     for (const l of pages[i].lines) {
       if (!l.text) continue;
