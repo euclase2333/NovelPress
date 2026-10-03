@@ -39,7 +39,7 @@ export function mountExport(btn) {
     if (!pages.length) { alert('页面参数无效：正文区放不下一行文字，请检查页边距、字号。'); return; }
 
     const keys = usedFontKeys(pages);
-    const msg = `即将导出 ${pages.length} 页 PDF（含 ${s.page.bleed}mm 出血与裁切角线）。\n本次使用并将嵌入的字体：${keys.map(keyLabel).join('、')}\n继续导出？`;
+    const msg = `即将导出 ${pages.length} 页 PDF（含 ${s.page.bleed}mm 出血）。\n本次使用并将嵌入的字体：${keys.map(keyLabel).join('、')}\n继续导出？`;
     if (!confirm(msg)) return;
 
     const label = btn.textContent;
